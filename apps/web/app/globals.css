@@ -111,3 +111,16 @@ body {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
+
+/* Tiled backdrop for brand panels */
+.tiles {
+  background:
+    conic-gradient(
+      from 45deg at 50% 50%,
+      color-mix(in oklab, var(--brand-ink) 16%, transparent) 0 25%,
+      transparent 0 50%,
+      color-mix(in oklab, var(--brand-ink) 7%, transparent) 0 75%,
+      transparent 0
+    )
+    0 0 / 56px 56px;
+}

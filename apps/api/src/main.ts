@@ -1,13 +1,18 @@
 import "reflect-metadata";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Behind Vercel + Render the real client IP sits in X-Forwarded-For (needed for rate limiting).
+  const hops = Number(process.env.TRUST_PROXY_HOPS ?? 0);
+  if (hops > 0) app.set("trust proxy", hops);
 
   // The API only returns JSON, so the default CSP is not needed (and breaks Swagger UI).
   app.use(helmet({ contentSecurityPolicy: false }));

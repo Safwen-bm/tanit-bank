@@ -13,7 +13,7 @@ const SWATCH: Record<(typeof THEMES)[number], { label: string; colors: [string, 
 
 const subscribe = () => () => {};
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
   const { theme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(subscribe, () => true, () => false);
 
@@ -33,7 +33,8 @@ export function ThemeSwitcher() {
             aria-checked={active}
             onClick={() => setTheme(name)}
             className={cn(
-              "flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+              "flex items-center gap-2 rounded-full text-xs font-medium transition-colors",
+              compact ? "p-2" : "px-3 py-1.5",
               active ? "bg-ink text-paper" : "text-ink-soft hover:text-ink",
             )}
           >
@@ -41,7 +42,7 @@ export function ThemeSwitcher() {
               className="size-3 rounded-full border border-black/10"
               style={{ background: `linear-gradient(135deg, ${colors[0]} 50%, ${colors[1]} 50%)` }}
             />
-            {label}
+            {compact ? <span className="sr-only">{label}</span> : label}
           </button>
         );
       })}
