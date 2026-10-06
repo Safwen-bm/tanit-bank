@@ -1,0 +1,263 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────── Enums ─────────────
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum AccountType {
+  CURRENT
+  SAVINGS
+  TREASURY // internal bank account, counterparty of every cash movement
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  LOAN_DISBURSEMENT
+  LOAN_REPAYMENT
+}
+
+enum LoanStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID_OFF
+}
+
+enum InstallmentStatus {
+  UNPAID
+  PAID
+}
+
+enum CardStatus {
+  ACTIVE
+  FROZEN
+}
+
+// ───────────── Identity ─────────────
+
+model User {
+  id           String   @id @default(uuid(7))
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         Role     @default(CUSTOMER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile       CustomerProfile?
+  accounts      Account[]
+  loans         Loan[]           @relation("LoanOwner")
+  reviewedLoans Loan[]           @relation("LoanReviewer")
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  sessions      RefreshSession[]
+  transactions  Transaction[]    @relation("TransactionInitiator")
+}
+
+model CustomerProfile {
+  userId        String   @id
+  monthlyIncome Decimal  @db.Decimal(14, 3)
+  phone         String?
+  address       String?
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// One row per logged-in device. The refresh token itself is never stored, only its hash.
+model RefreshSession {
+  id        String    @id @default(uuid(7))
+  userId    String
+  tokenHash String    @unique
+  userAgent String?
+  ip        String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ───────────── Banking ─────────────
+
+model Account {
+  id        String        @id @default(uuid(7))
+  iban      String        @unique
+  type      AccountType
+  status    AccountStatus @default(ACTIVE)
+  balance   Decimal       @default(0) @db.Decimal(14, 3)
+  currency  String        @default("TND")
+  label     String?
+  userId    String? // null only for the TREASURY account
+  createdAt DateTime      @default(now())
+  closedAt  DateTime?
+
+  user     User?         @relation(fields: [userId], references: [id])
+  cards    Card[]
+  outgoing Transaction[] @relation("TransactionFrom")
+  incoming Transaction[] @relation("TransactionTo")
+  loans    Loan[]
+
+  @@index([userId])
+}
+
+model Transaction {
+  id               String          @id @default(uuid(7))
+  type             TransactionType
+  amount           Decimal         @db.Decimal(14, 3)
+  fromAccountId    String?
+  toAccountId      String?
+  fromBalanceAfter Decimal?        @db.Decimal(14, 3)
+  toBalanceAfter   Decimal?        @db.Decimal(14, 3)
+  description      String?
+  initiatedById    String?
+  idempotencyKey   String?
+  createdAt        DateTime        @default(now())
+
+  fromAccount Account? @relation("TransactionFrom", fields: [fromAccountId], references: [id])
+  toAccount   Account? @relation("TransactionTo", fields: [toAccountId], references: [id])
+  initiatedBy User?    @relation("TransactionInitiator", fields: [initiatedById], references: [id])
+
+  // The same user sending the same key twice produces one transaction.
+  @@unique([initiatedById, idempotencyKey])
+  @@index([fromAccountId, createdAt])
+  @@index([toAccountId, createdAt])
+}
+
+// ───────────── Loans ─────────────
+
+model LoanProduct {
+  id           String   @id @default(uuid(7))
+  name         String
+  description  String?
+  annualRate   Decimal  @db.Decimal(7, 4) // percent, 9.5000 = 9.5 %
+  minAmount    Decimal  @db.Decimal(14, 3)
+  maxAmount    Decimal  @db.Decimal(14, 3)
+  minMonths    Int
+  maxMonths    Int
+  maxDebtRatio Decimal  @db.Decimal(5, 4) // 0.4000 = 40 % of monthly income
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  loans Loan[]
+}
+
+model Loan {
+  id              String     @id @default(uuid(7))
+  userId          String
+  accountId       String
+  productId       String
+  amount          Decimal    @db.Decimal(14, 3)
+  durationMonths  Int
+  interestRate    Decimal    @db.Decimal(7, 4) // snapshot of the product rate
+  monthlyPayment  Decimal    @db.Decimal(14, 3)
+  totalPayment    Decimal    @db.Decimal(14, 3)
+  totalInterest   Decimal    @db.Decimal(14, 3)
+  debtRatio       Decimal    @db.Decimal(6, 4) // monthlyPayment / declared income at application time
+  flagged         Boolean    @default(false) // true when debtRatio > product maxDebtRatio
+  purpose         String?
+  status          LoanStatus @default(PENDING)
+  rejectionReason String?
+  createdAt       DateTime   @default(now())
+  reviewedAt      DateTime?
+  reviewedById    String?
+  disbursedAt     DateTime?
+
+  user         User              @relation("LoanOwner", fields: [userId], references: [id])
+  reviewedBy   User?             @relation("LoanReviewer", fields: [reviewedById], references: [id])
+  account      Account           @relation(fields: [accountId], references: [id])
+  product      LoanProduct       @relation(fields: [productId], references: [id])
+  installments LoanInstallment[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model LoanInstallment {
+  id               String            @id @default(uuid(7))
+  loanId           String
+  number           Int
+  dueDate          DateTime          @db.Date
+  principal        Decimal           @db.Decimal(14, 3)
+  interest         Decimal           @db.Decimal(14, 3)
+  total            Decimal           @db.Decimal(14, 3)
+  remainingBalance Decimal           @db.Decimal(14, 3)
+  status           InstallmentStatus @default(UNPAID)
+  paidAt           DateTime?
+
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@unique([loanId, number])
+}
+
+// ───────────── Cards, notifications, audit ─────────────
+
+model Card {
+  id            String     @id @default(uuid(7))
+  accountId     String
+  holderName    String
+  last4         String     @db.VarChar(4)
+  expiryMonth   Int
+  expiryYear    Int
+  status        CardStatus @default(ACTIVE)
+  spendingLimit Decimal    @db.Decimal(14, 3)
+  createdAt     DateTime   @default(now())
+
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@index([accountId])
+}
+
+model Notification {
+  id        String    @id @default(uuid(7))
+  userId    String
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid(7))
+  userId    String?
+  action    String
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([action])
+}
