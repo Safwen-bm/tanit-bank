@@ -42,6 +42,55 @@ async function main() {
       },
     }));
   console.log(`Treasury ready: ${treasury.iban}`);
+
+  // 3. Demo loan products, only on an empty table (the admin owns them afterwards).
+  if ((await prisma.loanProduct.count()) === 0) {
+    await prisma.loanProduct.createMany({
+      data: [
+        {
+          name: "Personal loan",
+          description: "Flexible cash for projects, travel or unexpected costs.",
+          annualRate: "9.5",
+          minAmount: "1000",
+          maxAmount: "50000",
+          minMonths: 6,
+          maxMonths: 84,
+          maxDebtRatio: "0.4",
+        },
+        {
+          name: "Auto loan",
+          description: "Finance a new or used vehicle.",
+          annualRate: "8.25",
+          minAmount: "5000",
+          maxAmount: "120000",
+          minMonths: 12,
+          maxMonths: 84,
+          maxDebtRatio: "0.4",
+        },
+        {
+          name: "Home loan",
+          description: "Buy, build or renovate your home over the long term.",
+          annualRate: "7",
+          minAmount: "20000",
+          maxAmount: "500000",
+          minMonths: 60,
+          maxMonths: 300,
+          maxDebtRatio: "0.35",
+        },
+        {
+          name: "Student loan",
+          description: "Fund your studies at a gentle rate.",
+          annualRate: "5.5",
+          minAmount: "500",
+          maxAmount: "20000",
+          minMonths: 12,
+          maxMonths: 60,
+          maxDebtRatio: "0.3",
+        },
+      ],
+    });
+    console.log("Demo loan products created");
+  }
 }
 
 main()

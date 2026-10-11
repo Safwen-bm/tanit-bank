@@ -19,8 +19,14 @@ export interface PostInput {
   description?: string | null;
   initiatedById: string;
   idempotencyKey?: string;
+  cardId?: string;
   audit: { action: string; ip?: string };
   notifyRecipient?: { userId: string; title: string; body: string; link?: string };
+}
+
+/** Runs inside the money transaction, before any balance changes (locks, limits, extra rules). */
+export interface PostHooks {
+  before?: (tx: Prisma.TransactionClient) => Promise<void>;
 }
 
 export interface PostResult {
@@ -56,7 +62,7 @@ export class LedgerService {
     return this.treasuryId;
   }
 
-  async post(input: PostInput): Promise<PostResult> {
+  async post(input: PostInput, hooks?: PostHooks): Promise<PostResult> {
     if (input.fromAccountId === input.toAccountId) {
       throw new UnprocessableEntityException("Source and destination accounts must differ");
     }
@@ -66,10 +72,13 @@ export class LedgerService {
     if (known) return { transaction: known, replayed: true };
 
     try {
-      const transaction = await this.prisma.$transaction((tx) => this.apply(tx, input), {
-        maxWait: 5_000,
-        timeout: 15_000,
-      });
+      const transaction = await this.prisma.$transaction(
+        async (tx) => {
+          await hooks?.before?.(tx);
+          return this.apply(tx, input);
+        },
+        { maxWait: 5_000, timeout: 15_000 },
+      );
       return { transaction, replayed: false };
     } catch (error) {
       // Two identical requests raced: the loser hits the unique key and rolls back entirely.
@@ -105,7 +114,8 @@ export class LedgerService {
     return existing;
   }
 
-  private async apply(tx: Prisma.TransactionClient, input: PostInput): Promise<TransactionWithAccounts> {
+  /** Runs inside a caller-owned transaction, so approvals and repayments stay atomic with the money movement. */
+  async apply(tx: Prisma.TransactionClient, input: PostInput): Promise<TransactionWithAccounts> {
     const ids = [input.fromAccountId, input.toAccountId].sort();
 
     // Row locks, in a fixed order. A concurrent transfer touching the same accounts waits here.
@@ -146,6 +156,7 @@ export class LedgerService {
         description: input.description ?? null,
         initiatedById: input.initiatedById,
         idempotencyKey: input.idempotencyKey,
+        cardId: input.cardId,
       },
       include: TX_INCLUDE,
     });

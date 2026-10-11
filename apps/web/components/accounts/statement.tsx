@@ -1,10 +1,12 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { TransactionList, TYPE_LABELS } from "@/components/transactions/transaction-list";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
+import { downloadFile } from "@/lib/api";
 import { useDebounced } from "@/lib/use-debounced";
 import { useHistory } from "@/lib/queries";
 import type { HistoryFilters, TransactionType } from "@/lib/types";
@@ -20,10 +22,34 @@ export function Statement({ accountId }: { accountId: string }) {
   const update = (patch: Partial<HistoryFilters>) => setFilters((current) => ({ ...current, ...patch, page: 1 }));
   const filtered = filters.type || filters.from || filters.to || filters.q;
   const data = history.data;
+  const [downloading, setDownloading] = useState(false);
+
+  async function downloadPdf() {
+    const params = new URLSearchParams();
+    if (filters.from) params.set("from", filters.from);
+    if (filters.to) params.set("to", filters.to);
+    setDownloading(true);
+    try {
+      await downloadFile(`/accounts/${accountId}/statement?${params}`, "statement.pdf");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Download failed");
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   return (
     <section>
-      <h2 className="font-display text-2xl font-semibold">Statement</h2>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <h2 className="font-display text-2xl font-semibold">Statement</h2>
+        <Button variant="outline" size="sm" loading={downloading} onClick={downloadPdf}>
+          <Download className="size-4" aria-hidden="true" />
+          Download PDF
+        </Button>
+      </div>
+      <p className="mt-1 text-sm text-ink-soft">
+        The PDF covers the dates you pick below (every movement, whatever the other filters say).
+      </p>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <label className="relative block">

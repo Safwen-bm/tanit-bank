@@ -134,3 +134,31 @@ export async function logoutRequest() {
     accessToken = null;
   }
 }
+
+
+/** Downloads a protected file (the bearer token cannot ride on a plain link). */
+export async function downloadFile(path: string, fallbackName: string) {
+  const send = () =>
+    fetch(`/api${path}`, {
+      credentials: "same-origin",
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    });
+
+  let res = await send();
+  if (res.status === 401) {
+    const session = await refreshSession();
+    if (session) res = await send();
+    else onSessionLost?.();
+  }
+  if (!res.ok) throw await toApiError(res);
+
+  const name = /filename="?([^";]+)"?/.exec(res.headers.get("content-disposition") ?? "")?.[1] ?? fallbackName;
+  const url = URL.createObjectURL(await res.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}

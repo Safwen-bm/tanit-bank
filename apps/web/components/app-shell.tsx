@@ -9,6 +9,7 @@ import type { Role } from "@/lib/api";
 import { homeFor } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { useAuth } from "./auth-provider";
+import { NotificationBell } from "./notification-bell";
 import { TanitMark } from "./tanit-mark";
 import { ThemeSwitcher } from "./theme-switcher";
 import { Button } from "./ui/button";
@@ -81,9 +82,12 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
     <div className="min-h-dvh lg:grid lg:grid-cols-[270px_1fr]">
       <aside className="sticky top-0 hidden h-dvh flex-col border-r-2 border-ink bg-card lg:flex">
         <div className="mosaic" />
-        <div className="flex items-center gap-2.5 px-6 py-6 text-brand">
-          <TanitMark className="size-7" />
-          <span className="font-display text-xl font-semibold tracking-tight">Tanit Bank</span>
+        <div className="flex items-center justify-between px-6 py-6">
+          <div className="flex items-center gap-2.5 text-brand">
+            <TanitMark className="size-7" />
+            <span className="font-display text-xl font-semibold tracking-tight">Tanit Bank</span>
+          </div>
+          {role === "CUSTOMER" && <NotificationBell />}
         </div>
         {role === "ADMIN" && (
           <p className="num mx-6 mb-3 text-[10px] tracking-[0.25em] text-accent uppercase">Back office</p>
@@ -116,6 +120,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
               <span className="font-display text-lg font-semibold">Tanit Bank</span>
             </div>
             <div className="flex items-center gap-2">
+              {role === "CUSTOMER" && <NotificationBell />}
               <ThemeSwitcher compact />
               <Button variant="ghost" size="sm" onClick={handleLogout} aria-label="Sign out">
                 <LogOut className="size-4" aria-hidden="true" />

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button-link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -92,9 +92,9 @@ function TransferForm({ accounts }: { accounts: Account[] }) {
           >
             New transfer
           </Button>
-          <Link href="/dashboard">
-            <Button variant="ghost">Back to overview</Button>
-          </Link>
+          <ButtonLink href="/dashboard" variant="ghost">
+            Back to overview
+          </ButtonLink>
         </div>
       </div>
     );

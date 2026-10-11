@@ -145,6 +145,46 @@ export class TransactionsService {
     };
   }
 
+   /**
+   * Money in and out per calendar month (UTC). Moves between the customer's own accounts are
+   * left out: they are neither income nor spending.
+   */
+  async cashflow(userId: string, months: number) {
+    const now = new Date();
+    const first = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (months - 1), 1));
+    const mine = await this.prisma.account.findMany({ where: { userId }, select: { id: true } });
+    const ids = mine.map((a) => a.id);
+
+    const rows =
+      ids.length === 0
+        ? []
+        : await this.prisma.$queryRaw<{ month: string; income: string; expenses: string }[]>`
+            SELECT to_char(date_trunc('month', t."createdAt"), 'YYYY-MM') AS month,
+                   COALESCE(SUM(CASE WHEN COALESCE(t."toAccountId" = ANY(${ids}::text[]), false)
+                                      AND NOT COALESCE(t."fromAccountId" = ANY(${ids}::text[]), false)
+                                     THEN t.amount END), 0)::text AS income,
+                   COALESCE(SUM(CASE WHEN COALESCE(t."fromAccountId" = ANY(${ids}::text[]), false)
+                                      AND NOT COALESCE(t."toAccountId" = ANY(${ids}::text[]), false)
+                                     THEN t.amount END), 0)::text AS expenses
+            FROM "Transaction" t
+            WHERE t."createdAt" >= ${first}
+              AND (t."fromAccountId" = ANY(${ids}::text[]) OR t."toAccountId" = ANY(${ids}::text[]))
+            GROUP BY 1
+            ORDER BY 1`;
+
+    const byMonth = new Map(rows.map((row) => [row.month, row]));
+    return Array.from({ length: months }, (_, index) => {
+      const date = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + index, 1));
+      const key = date.toISOString().slice(0, 7);
+      const row = byMonth.get(key);
+      return {
+        month: key,
+        income: new Prisma.Decimal(row?.income ?? 0).toFixed(3),
+        expenses: new Prisma.Decimal(row?.expenses ?? 0).toFixed(3),
+      };
+    });
+  }
+
   /** Latest activity across all of the customer's accounts (dashboard). */
   async recent(userId: string, limit: number) {
     const mine = await this.prisma.account.findMany({ where: { userId }, select: { id: true } });

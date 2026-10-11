@@ -15,7 +15,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed:demo": "node dist/demo/seed-demo.js"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",
@@ -37,6 +38,7 @@
     "helmet": "8.3.0",
     "passport": "0.7.0",
     "passport-jwt": "4.0.1",
+    "pdfkit": "0.20.2",
     "pg": "8.23.1",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2"
@@ -48,6 +50,7 @@
     "@types/express": "5.0.6",
     "@types/node": "22.20.5",
     "@types/passport-jwt": "4.0.1",
+    "@types/pdfkit": "0.17.6",
     "@types/pg": "8.23.1",
     "prisma": "7.10.0",
     "tsx": "4.23.15",

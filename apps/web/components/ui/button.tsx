@@ -4,7 +4,7 @@ import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 // "Stamp" buttons: hard offset shadow that presses flat when clicked.
-const button = cva(
+export const buttonVariants = cva(
   "inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-lg border-2 border-ink px-5 py-2.5 text-sm font-semibold transition-all duration-100 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
@@ -22,11 +22,11 @@ const button = cva(
 );
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> &
-  VariantProps<typeof button> & { loading?: boolean };
+  VariantProps<typeof buttonVariants> & { loading?: boolean };
 
 export function Button({ className, variant, size, loading, children, disabled, ...props }: Props) {
   return (
-    <button className={cn(button({ variant, size }), className)} disabled={disabled || loading} {...props}>
+    <button className={cn(buttonVariants({ variant, size }), className)} disabled={disabled || loading} {...props}>
       {loading && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
       {children}
     </button>

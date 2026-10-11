@@ -33,6 +33,7 @@ enum TransactionType {
   TRANSFER
   LOAN_DISBURSEMENT
   LOAN_REPAYMENT
+  CARD_PAYMENT
 }
 
 enum LoanStatus {
@@ -134,16 +135,19 @@ model Transaction {
   description      String?
   initiatedById    String?
   idempotencyKey   String?
+  cardId           String? // set for CARD_PAYMENT, used for the monthly spending limit
   createdAt        DateTime        @default(now())
 
   fromAccount Account? @relation("TransactionFrom", fields: [fromAccountId], references: [id])
   toAccount   Account? @relation("TransactionTo", fields: [toAccountId], references: [id])
   initiatedBy User?    @relation("TransactionInitiator", fields: [initiatedById], references: [id])
+  card        Card?    @relation(fields: [cardId], references: [id])
 
   // The same user sending the same key twice produces one transaction.
   @@unique([initiatedById, idempotencyKey])
   @@index([fromAccountId, createdAt])
   @@index([toAccountId, createdAt])
+  @@index([cardId, createdAt])
 }
 
 // ───────────── Loans ─────────────
@@ -226,7 +230,8 @@ model Card {
   spendingLimit Decimal    @db.Decimal(14, 3)
   createdAt     DateTime   @default(now())
 
-  account Account @relation(fields: [accountId], references: [id])
+  account      Account       @relation(fields: [accountId], references: [id])
+  transactions Transaction[]
 
   @@index([accountId])
 }

@@ -3,13 +3,15 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { AccountCard } from "@/components/accounts/account-card";
+import { CashflowChart } from "@/components/charts/cashflow-chart";
 import { OpenAccountForm } from "@/components/accounts/open-account-form";
 import { useAuth } from "@/components/auth-provider";
+import { LoanProgress } from "@/components/loans/loan-card";
 import { TransactionList } from "@/components/transactions/transaction-list";
 import { api } from "@/lib/api";
 import { formatDate, formatTnd } from "@/lib/format";
 import { sumMoney } from "@/lib/money";
-import { useAccounts, useRecent } from "@/lib/queries";
+import { useAccounts, useCashflow, useMyLoans, useRecent } from "@/lib/queries";
 
 interface Me {
   createdAt: string;
@@ -27,6 +29,9 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const accounts = useAccounts();
   const recent = useRecent(8);
+  const loans = useMyLoans();
+  const cashflow = useCashflow(6);
+  const activeLoans = loans.data?.filter((loan) => loan.status === "APPROVED") ?? [];
   const me = useQuery({ queryKey: ["me"], queryFn: () => api<Me>("/users/me") });
 
   const open = accounts.data?.filter((account) => account.status !== "CLOSED") ?? [];
@@ -50,6 +55,51 @@ export default function DashboardPage() {
       <section aria-label="Accounts" className="grid gap-5 sm:grid-cols-2">
         {accounts.data?.map((account) => <AccountCard key={account.id} account={account} />)}
         <OpenAccountForm />
+      </section>
+
+      {activeLoans.length > 0 && (
+        <section aria-label="Active loans">
+          <div className="flex items-end justify-between">
+            <h2 className="font-display text-2xl font-semibold">Active loans</h2>
+            <Link href="/loans" className="text-sm font-semibold text-brand underline underline-offset-4">
+              All loans
+            </Link>
+          </div>
+          <div className="mt-4 grid gap-5 sm:grid-cols-2">
+            {activeLoans.map((loan) => (
+              <Link
+                key={loan.id}
+                href={`/loans/${loan.id}`}
+                className="block rounded-xl border-2 border-ink bg-card p-5 transition-colors hover:bg-paper-2/60"
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="font-display text-lg font-semibold">{loan.product.name}</p>
+                  <p className="num text-sm text-ink-soft">{formatTnd(loan.amount)}</p>
+                </div>
+                {loan.nextInstallment && (
+                  <p className="num mt-2 text-sm">
+                    Next {formatTnd(loan.nextInstallment.amount)} on {formatDate(loan.nextInstallment.dueDate)}
+                  </p>
+                )}
+                <div className="mt-4">
+                  <LoanProgress paid={loan.paidInstallments} total={loan.durationMonths} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section aria-label="Cash flow">
+        <h2 className="font-display text-2xl font-semibold">Money in and out</h2>
+        <p className="mt-1 text-sm text-ink-soft">Last six months. Moves between your own accounts are not counted.</p>
+        <div className="mt-4 rounded-xl border-2 border-ink bg-card p-5">
+          {cashflow.isLoading ? (
+            <p className="py-16 text-center text-ink-soft">Loading...</p>
+          ) : cashflow.data ? (
+            <CashflowChart data={cashflow.data} />
+          ) : null}
+        </div>
       </section>
 
       <section>

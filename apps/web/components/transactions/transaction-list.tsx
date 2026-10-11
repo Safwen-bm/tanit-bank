@@ -10,6 +10,7 @@ const LABELS: Record<TransactionType, string> = {
   TRANSFER: "Transfer",
   LOAN_DISBURSEMENT: "Loan disbursement",
   LOAN_REPAYMENT: "Loan repayment",
+  CARD_PAYMENT: "Card payment",
 };
 
 export const TYPE_LABELS = LABELS;

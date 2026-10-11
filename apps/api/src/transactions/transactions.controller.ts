@@ -59,6 +59,11 @@ export class TransactionsController {
     });
   }
 
+  @Get("summary")
+  summary(@CurrentUser() user: AuthUser, @Query("months", new ParseIntPipe({ optional: true })) months = 6) {
+    return this.transactions.cashflow(user.id, Math.min(Math.max(months, 1), 12));
+  }
+
   @Get("recent")
   recent(@CurrentUser() user: AuthUser, @Query("limit", new ParseIntPipe({ optional: true })) limit = 8) {
     return this.transactions.recent(user.id, Math.min(Math.max(limit, 1), 30));

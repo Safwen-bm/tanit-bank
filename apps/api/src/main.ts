@@ -33,11 +33,26 @@ async function bootstrap() {
 
   const swagger = new DocumentBuilder()
     .setTitle("Tanit Bank API")
-    .setDescription("Retail banking REST API")
+    .setDescription(
+      [
+        "Retail banking REST API: accounts, atomic transfers, loans, cards and an admin back office.",
+        "",
+        "**Try it:** call `POST /auth/login`, copy the `accessToken` from the response, click **Authorize** and paste it.",
+        "",
+        "**Money** is always a decimal string with up to 3 decimals (the dinar has millimes), never a JSON number.",
+        "",
+        "**Idempotency:** transfers require an `Idempotency-Key` header. Sending the same key twice moves the money once.",
+        "",
+        "Simulated bank for a portfolio project. No real money.",
+      ].join("\n"),
+    )
     .setVersion("1.0")
     .addBearerAuth()
     .build();
-  SwaggerModule.setup("docs", app, SwaggerModule.createDocument(app, swagger));
+  SwaggerModule.setup("docs", app, SwaggerModule.createDocument(app, swagger), {
+    customSiteTitle: "Tanit Bank API",
+    swaggerOptions: { persistAuthorization: true, tagsSorter: "alpha", operationsSorter: "alpha" },
+  });
 
   app.enableShutdownHooks();
   await app.listen(Number(process.env.PORT ?? 4000), "0.0.0.0");
