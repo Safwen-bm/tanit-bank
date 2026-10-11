@@ -16,7 +16,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "db:seed:demo": "node dist/demo/seed-demo.js"
+    "db:seed:demo": "node dist/src/demo/seed-demo.js"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",
