@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 
-/** Ledger-style input: a ruled underline instead of a boxed field. */
 export const inputClass =
-  "w-full border-0 border-b-2 border-rule bg-transparent py-2 text-base outline-none transition-colors placeholder:text-ink-soft/50 focus:border-brand";
+  "w-full rounded-[3px] border border-ink/30 bg-card px-4 py-3.5 text-base text-ink outline-none transition placeholder:text-ink-soft/50 hover:border-ink/60 focus:border-ink focus:shadow-[0_3px_0_0_var(--brand)]";
 
 export function Field({
   label,
@@ -19,16 +18,16 @@ export function Field({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="num mb-1 block text-[11px] uppercase tracking-[0.18em] text-ink-soft">
+      <label htmlFor={htmlFor} className="mb-2 block text-sm font-semibold text-ink">
         {label}
       </label>
       {children}
       {error ? (
-        <p role="alert" className="mt-1.5 text-sm text-negative">
+        <p role="alert" className="mt-2 text-sm font-medium text-negative">
           {error}
         </p>
       ) : hint ? (
-        <p className="mt-1.5 text-xs text-ink-soft">{hint}</p>
+        <p className="mt-2 text-xs text-ink-soft">{hint}</p>
       ) : null}
     </div>
   );

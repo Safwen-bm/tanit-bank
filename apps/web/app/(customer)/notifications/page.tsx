@@ -1,3 +1,4 @@
+// apps\web\app\(customer)\notifications\page.tsx
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";

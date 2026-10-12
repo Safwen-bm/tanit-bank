@@ -1,3 +1,4 @@
+// apps\web\lib\types.ts
 export type AccountType = "CURRENT" | "SAVINGS";
 export type AccountStatus = "ACTIVE" | "FROZEN" | "CLOSED";
 

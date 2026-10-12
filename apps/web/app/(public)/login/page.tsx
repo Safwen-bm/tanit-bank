@@ -10,6 +10,7 @@ import { AuthShell } from "@/components/auth-shell";
 import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
+import { PasswordInput } from "@/components/ui/password-input";
 import { homeFor, safeNext } from "@/lib/routes";
 
 const schema = z.object({
@@ -44,27 +45,21 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-7" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
       <Field label="Email" htmlFor="email" error={errors.email?.message}>
         <input id="email" type="email" autoComplete="email" className={inputClass} {...register("email")} />
       </Field>
       <Field label="Password" htmlFor="password" error={errors.password?.message}>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          className={inputClass}
-          {...register("password")}
-        />
+        <PasswordInput id="password" autoComplete="current-password" {...register("password")} />
       </Field>
 
       {errors.root && (
-        <p role="alert" className="rounded-lg border-2 border-negative px-4 py-3 text-sm text-negative">
+        <p role="alert" className="border-l-4 border-negative bg-negative/10 px-4 py-3 text-sm font-medium text-negative">
           {errors.root.message}
         </p>
       )}
 
-      <Button type="submit" loading={isSubmitting} className="w-full">
+      <Button type="submit" size="lg" loading={isSubmitting} className="w-full">
         Sign in
       </Button>
     </form>
@@ -76,10 +71,12 @@ export default function LoginPage() {
     <AuthShell
       title="Welcome back"
       subtitle="Sign in to see your accounts."
+      headline="Your accounts are right where you left them."
+      image="/images/auth-login.jpg"
       footer={
         <>
           New to Tanit Bank?{" "}
-          <Link href="/register" className="font-semibold text-brand underline underline-offset-4">
+          <Link href="/register" className="font-semibold text-brand underline underline-offset-4 decoration-2">
             Open an account
           </Link>
         </>

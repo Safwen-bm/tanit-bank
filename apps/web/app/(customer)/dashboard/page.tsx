@@ -1,3 +1,4 @@
+// apps\web\app\(customer)\dashboard\page.tsx
 "use client";
 
 import { useQuery } from "@tanstack/react-query";

@@ -2,9 +2,10 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { ButtonLink } from "@/components/ui/button-link";
+import { Guilloche } from "@/components/ui/guilloche";
 import { api } from "@/lib/api";
 import { formatTnd } from "@/lib/format";
 import { fractionToPercent } from "@/lib/money";
@@ -45,13 +46,15 @@ function Slider({
   onType: (raw: string) => void;
 }) {
   const [raw, setRaw] = useState<string | null>(null);
+  const fill = max > min ? ((value - min) / (max - min)) * 100 : 0;
+
   return (
     <div>
       <div className="flex items-end justify-between gap-4">
-        <label htmlFor={id} className="num text-[11px] tracking-[0.18em] text-ink-soft uppercase">
+        <label htmlFor={id} className="text-sm font-semibold text-ink">
           {label}
         </label>
-        <div className="flex items-baseline gap-2 border-b-2 border-rule focus-within:border-brand">
+        <div className="flex items-baseline gap-2 border-b-2 border-ink pb-1 focus-within:border-brand">
           <input
             id={id}
             inputMode="numeric"
@@ -78,9 +81,10 @@ function Slider({
           setRaw(null);
           onSlide(Number(event.target.value));
         }}
-        className="mt-4 h-2 w-full cursor-pointer accent-brand"
+        style={{ "--fill": `${fill}%` } as CSSProperties}
+        className="slider mt-4"
       />
-      <div className="num mt-1 flex justify-between text-xs text-ink-soft">
+      <div className="num flex justify-between text-xs text-ink-soft">
         <span>{nf.format(min)}</span>
         <span>{nf.format(max)}</span>
       </div>
@@ -126,9 +130,9 @@ export function LoanSimulator() {
   if (products.isLoading) return <p className="text-ink-soft">Loading loan products...</p>;
   if (!product) {
     return (
-      <div className="rounded-xl border-2 border-dashed border-rule p-10 text-center">
-        <p className="font-display text-xl">No loan products are available right now.</p>
-        <p className="mt-2 text-sm text-ink-soft">The bank has not published any conditions yet. Please come back soon.</p>
+      <div className="border-2 border-dashed border-ink/25 p-12 text-center">
+        <p className="font-display text-3xl">No loan products are available right now.</p>
+        <p className="mt-3 text-ink-soft">The bank has not published any conditions yet. Please come back soon.</p>
       </div>
     );
   }
@@ -137,11 +141,14 @@ export function LoanSimulator() {
   const interestShare = result ? (Number(result.totalInterest) / Number(result.totalPayment)) * 100 : 0;
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,400px)_1fr] lg:items-start">
-      <section aria-label="Loan settings" className="space-y-9 rounded-xl border-2 border-ink bg-card p-6 shadow-[4px_4px_0_0_var(--ink)]">
+    <div className="grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:items-start lg:gap-14">
+      <section
+        aria-label="Loan settings"
+        className="space-y-10 border-2 border-ink bg-card p-6 sm:p-7 lg:sticky lg:top-24"
+      >
         <fieldset>
-          <legend className="num mb-3 text-[11px] tracking-[0.18em] text-ink-soft uppercase">Loan type</legend>
-          <div className="grid gap-2">
+          <legend className="mb-3 text-sm font-semibold text-ink">Loan type</legend>
+          <div className="grid gap-px border border-ink/20 bg-ink/20">
             {list.map((item) => {
               const active = item.id === product.id;
               return (
@@ -150,11 +157,17 @@ export function LoanSimulator() {
                   onClick={() => setProductId(item.id)}
                   aria-pressed={active}
                   className={cn(
-                    "flex cursor-pointer items-center justify-between gap-3 rounded-lg border-2 px-4 py-3 text-left transition-colors",
-                    active ? "border-ink bg-ink text-paper" : "border-rule hover:border-ink",
+                    "flex cursor-pointer items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors",
+                    active ? "bg-brand text-brand-ink" : "bg-card hover:bg-paper-2",
                   )}
                 >
-                  <span className="font-medium">{item.name}</span>
+                  <span className="flex items-center gap-3">
+                    <span
+                      className={cn("size-3 border-2", active ? "border-brand-ink bg-brand-ink" : "border-ink/40")}
+                      aria-hidden="true"
+                    />
+                    <span className="font-semibold">{item.name}</span>
+                  </span>
                   <span className="num text-sm">{Number(item.annualRate).toFixed(2)} %</span>
                 </button>
               );
@@ -187,73 +200,74 @@ export function LoanSimulator() {
         />
       </section>
 
-      <section aria-label="Result" aria-live="polite" className="min-w-0 space-y-8">
+      <section aria-label="Result" aria-live="polite" className="min-w-0 space-y-12">
         {simulation.error && !result ? (
-          <div role="alert" className="rounded-xl border-2 border-negative p-6 text-negative">
+          <div role="alert" className="border-l-4 border-negative bg-negative/10 p-6 font-medium text-negative">
             {simulation.error.message}
           </div>
         ) : (
           <>
-            <div className="relative overflow-hidden rounded-xl border-2 border-ink bg-brand p-8 text-brand-ink shadow-[6px_6px_0_0_var(--ink)]">
-              <div className="tiles absolute inset-0 opacity-60" aria-hidden="true" />
-              <div className="relative">
-                <p className="num text-[11px] tracking-[0.2em] uppercase opacity-80">Your monthly payment</p>
-                <p className={cn("num mt-2 text-5xl font-semibold sm:text-6xl", simulation.isPlaceholderData && "opacity-60")}>
-                  {result ? formatTnd(result.monthlyPayment) : "..."}
-                </p>
-                {result && (
-                  <p className="mt-3 text-sm opacity-80">
-                    over {result.months} months at {Number(result.annualRate).toFixed(2)} % a year
-                  </p>
+            <div className="relative isolate overflow-hidden bg-brand p-8 text-brand-ink sm:p-12">
+              <Guilloche className="absolute -top-40 -right-40 -z-10 size-[34rem] text-brand-ink/14" />
+              <p className="text-base font-medium opacity-85">Your monthly payment</p>
+              <p
+                className={cn(
+                  "font-display condensed mt-3 text-[clamp(4.5rem,12vw,9.5rem)] leading-[0.9] transition-opacity",
+                  simulation.isPlaceholderData && "opacity-60",
                 )}
-              </div>
+              >
+                {result ? formatTnd(result.monthlyPayment).replace(" TND", "") : "..."}
+                {result && <span className="ml-3 text-[0.3em] font-semibold opacity-80">TND</span>}
+              </p>
+              {result && (
+                <p className="mt-5 text-base opacity-85">
+                  over {result.months} months at {Number(result.annualRate).toFixed(2)} % a year
+                </p>
+              )}
             </div>
 
             {result && (
               <>
-                <dl className="grid gap-4 sm:grid-cols-3">
-                  {[
-                    ["Amount borrowed", formatTnd(result.amount)],
-                    ["Total interest", formatTnd(result.totalInterest)],
-                    ["Total to repay", formatTnd(result.totalPayment)],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded-xl border border-rule bg-card p-4">
-                      <dt className="num text-[11px] tracking-[0.15em] text-ink-soft uppercase">{label}</dt>
-                      <dd className="num mt-1 text-lg font-semibold">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-
                 <div>
-                  <div className="flex h-3 overflow-hidden rounded-full border border-ink" aria-hidden="true">
+                  <dl className="grid divide-y divide-ink/15 border-y-2 border-ink sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                    {[
+                      ["Amount borrowed", formatTnd(result.amount)],
+                      ["Total interest", formatTnd(result.totalInterest)],
+                      ["Total to repay", formatTnd(result.totalPayment)],
+                    ].map(([label, value]) => (
+                      <div key={label} className="px-1 py-5 sm:px-6 sm:first:pl-0">
+                        <dt className="text-sm text-ink-soft">{label}</dt>
+                        <dd className="font-display mt-1.5 text-3xl">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+
+                  <div className="mt-6 flex h-4 overflow-hidden" aria-hidden="true">
                     <div className="bg-brand" style={{ width: `${100 - interestShare}%` }} />
-                    <div className="bg-accent" style={{ width: `${interestShare}%` }} />
+                    <div className="bg-ink" style={{ width: `${interestShare}%` }} />
                   </div>
-                  <div className="num mt-2 flex justify-between text-xs text-ink-soft">
+                  <div className="mt-2 flex justify-between text-sm text-ink-soft">
                     <span>Principal {(100 - interestShare).toFixed(1)} %</span>
-                    <span className="text-accent">Interest {interestShare.toFixed(1)} %</span>
+                    <span className="font-semibold text-ink">Interest {interestShare.toFixed(1)} %</span>
                   </div>
                 </div>
 
-                <div className="rounded-xl border-2 border-dashed border-rule p-5 text-sm">
-                  <p>
-                    To stay within this product&apos;s {fractionToPercent(result.product.maxDebtRatio)} % debt ratio, a
-                    monthly income of about{" "}
-                    <strong className="num whitespace-nowrap">{formatTnd(result.minimumIncome)}</strong> is expected.
+                <div className="border-l-4 border-brand bg-paper-2 p-6 text-base">
+                  <p className="max-w-2xl leading-relaxed">
+                    To stay within this product’s {fractionToPercent(result.product.maxDebtRatio)} % debt ratio, a monthly
+                    income of about <strong className="whitespace-nowrap">{formatTnd(result.minimumIncome)}</strong> is
+                    expected.
                   </p>
                   {status !== "authenticated" && (
-                    <div className="mt-4 flex flex-wrap items-center gap-3">
-                      <ButtonLink href="/register" size="sm">
-                        Open an account to apply
-                      </ButtonLink>
-                      <span className="text-ink-soft">The simulation above is not saved anywhere.</span>
+                    <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+                      <ButtonLink href="/register">Open an account to apply</ButtonLink>
+                      <span className="text-sm text-ink-soft">The simulation above is not saved anywhere.</span>
                     </div>
                   )}
                   {status === "authenticated" && user?.role === "CUSTOMER" && (
-                    <div className="mt-4">
+                    <div className="mt-5">
                       <ButtonLink
                         href={`/loans/apply?product=${product.id}&amount=${debouncedAmount}&months=${debouncedMonths}`}
-                        size="sm"
                       >
                         Apply for this loan
                       </ButtonLink>
@@ -262,14 +276,14 @@ export function LoanSimulator() {
                 </div>
 
                 <div>
-                  <h2 className="font-display text-xl font-semibold">Remaining balance</h2>
-                  <div className="mt-3 rounded-xl border-2 border-ink bg-card p-4">
+                  <h2 className="font-display condensed text-4xl">Remaining balance</h2>
+                  <div className="mt-4 border border-ink/20 bg-card p-4">
                     <BalanceChart schedule={result.schedule} amount={result.amount} />
                   </div>
                 </div>
 
                 <div>
-                  <h2 className="font-display mb-3 text-xl font-semibold">Repayment schedule</h2>
+                  <h2 className="font-display condensed mb-4 text-4xl">Repayment schedule</h2>
                   <ScheduleTable schedule={result.schedule} />
                 </div>
               </>

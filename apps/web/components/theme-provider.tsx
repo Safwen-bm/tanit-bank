@@ -3,14 +3,15 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { ReactNode } from "react";
 
-export const THEMES = ["sable", "nuit", "lagune"] as const;
+export const THEMES = ["rouge", "olive", "nuit"] as const;
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <NextThemesProvider
       attribute="data-theme"
       themes={[...THEMES]}
-      defaultTheme="sable"
+      defaultTheme="rouge"
+      storageKey="tanit-theme"
       enableSystem={false}
       disableTransitionOnChange
     >

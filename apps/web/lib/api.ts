@@ -1,3 +1,4 @@
+// apps\web\lib\api.ts
 export type Role = "CUSTOMER" | "ADMIN";
 
 export interface PublicUser {

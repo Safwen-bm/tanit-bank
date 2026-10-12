@@ -13,7 +13,7 @@ export function ProductRate({ rate }: { rate: string }) {
 
 export function ProductFacts({ product }: { product: LoanProduct }) {
   return (
-    <dl className="mt-5 space-y-2 border-t-2 border-dashed border-rule pt-4 text-sm">
+    <dl className="mt-5 space-y-2 border-t border-rule pt-4 text-sm">
       <div className="flex justify-between gap-3">
         <dt className="text-ink-soft">Amount</dt>
         <dd className="num text-right">
