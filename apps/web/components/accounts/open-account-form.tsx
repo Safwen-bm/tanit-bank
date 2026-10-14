@@ -30,10 +30,10 @@ export function OpenAccountForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex min-h-48 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-rule text-ink-soft transition-colors hover:border-ink hover:text-ink"
+        className="flex min-h-48 w-full cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed border-ink/25 text-ink-soft transition-colors hover:border-ink hover:text-ink"
       >
-        <Plus className="size-6" aria-hidden="true" />
-        <span className="text-sm font-medium">Open another account</span>
+        <Plus className="size-7" aria-hidden="true" />
+        <span className="text-sm font-semibold">Open another account</span>
       </button>
     );
   }
@@ -44,7 +44,7 @@ export function OpenAccountForm() {
         event.preventDefault();
         mutation.mutate();
       }}
-      className="space-y-5 rounded-xl border-2 border-ink bg-card p-6"
+      className="space-y-5 border border-t-8 border-ink/20 border-t-brand bg-card p-6"
     >
       <Field label="Type" htmlFor="new-type">
         <select

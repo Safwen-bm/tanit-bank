@@ -10,6 +10,7 @@ import { homeFor } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { useAuth } from "./auth-provider";
 import { NotificationBell } from "./notification-bell";
+import { TanitLogo } from "./tanit-logo";
 import { TanitMark } from "./tanit-mark";
 import { ThemeSwitcher } from "./theme-switcher";
 import { Button } from "./ui/button";
@@ -19,17 +20,20 @@ function isActive(pathname: string, item: NavItem) {
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
-function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
+/** `row` is the horizontal version used in the mobile header. */
+function NavLink({ item, pathname, row = false }: { item: NavItem; pathname: string; row?: boolean }) {
   const Icon = item.icon;
   const active = isActive(pathname, item);
-  const base = "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap";
+  const base = row
+    ? "flex items-center gap-2 border-b-[3px] px-3.5 py-3 text-sm font-semibold whitespace-nowrap"
+    : "flex items-center gap-3 border-l-4 px-6 py-3 text-[15px] font-semibold whitespace-nowrap";
 
   if (!item.ready) {
     return (
-      <span className={cn(base, "cursor-not-allowed text-ink-soft/50")} aria-disabled="true">
+      <span className={cn(base, "cursor-not-allowed border-transparent text-ink-soft/50")} aria-disabled="true">
         <Icon className="size-4" aria-hidden="true" />
         {item.label}
-        <span className="num ml-auto text-[10px] tracking-wider uppercase">soon</span>
+        <span className="ml-auto text-xs font-medium">Soon</span>
       </span>
     );
   }
@@ -40,10 +44,12 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
       className={cn(
         base,
         "transition-colors",
-        active ? "bg-ink text-paper" : "text-ink-soft hover:bg-paper-2 hover:text-ink",
+        active
+          ? cn("border-brand text-ink", row ? "" : "bg-paper-2")
+          : "border-transparent text-ink-soft hover:text-ink",
       )}
     >
-      <Icon className="size-4" aria-hidden="true" />
+      <Icon className={cn("size-[18px]", active && "text-brand")} aria-hidden="true" />
       {item.label}
     </Link>
   );
@@ -67,7 +73,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
 
   if (!allowed || !user) {
     return (
-      <div className="ledger flex min-h-dvh items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center bg-paper">
         <TanitMark className="size-10 animate-pulse text-brand" />
       </div>
     );
@@ -80,24 +86,22 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[270px_1fr]">
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r-2 border-ink bg-card lg:flex">
-        <div className="mosaic" />
-        <div className="flex items-center justify-between px-6 py-6">
-          <div className="flex items-center gap-2.5 text-brand">
-            <TanitMark className="size-7" />
-            <span className="font-display text-xl font-semibold tracking-tight">Tanit Bank</span>
-          </div>
+      <aside className="sticky top-0 hidden h-dvh flex-col border-t-8 border-r border-ink/20 border-t-brand bg-card lg:flex">
+        <div className="flex items-center justify-between px-6 pt-7 pb-7">
+          <Link href={homeFor(role)} aria-label="Tanit Bank, home">
+            <TanitLogo />
+          </Link>
           {role === "CUSTOMER" && <NotificationBell />}
         </div>
         {role === "ADMIN" && (
-          <p className="num mx-6 mb-3 text-[10px] tracking-[0.25em] text-accent uppercase">Back office</p>
+          <p className="mx-6 mb-5 w-fit bg-ink px-2.5 py-1 text-xs font-semibold text-paper">Back office</p>
         )}
-        <nav className="flex-1 space-y-1 px-3" aria-label="Main">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto" aria-label="Main">
           {nav.map((item) => (
             <NavLink key={item.href} item={item} pathname={pathname} />
           ))}
         </nav>
-        <div className="space-y-4 border-t border-rule p-5">
+        <div className="space-y-4 border-t border-ink/20 p-6">
           <div>
             <p className="truncate text-sm font-semibold">{user.fullName}</p>
             <p className="num truncate text-xs text-ink-soft">{user.email}</p>
@@ -112,14 +116,13 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
         </div>
       </aside>
 
-      <div className="ledger flex min-h-dvh flex-col">
-        <header className="border-b-2 border-ink bg-card lg:hidden">
+      <div className="flex min-h-dvh flex-col bg-paper">
+        <header className="border-t-8 border-b border-ink/20 border-t-brand bg-card lg:hidden">
           <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2 text-brand">
-              <TanitMark className="size-6" />
-              <span className="font-display text-lg font-semibold">Tanit Bank</span>
-            </div>
-            <div className="flex items-center gap-2">
+            <Link href={homeFor(role)} aria-label="Tanit Bank, home">
+              <TanitLogo />
+            </Link>
+            <div className="flex items-center gap-3">
               {role === "CUSTOMER" && <NotificationBell />}
               <ThemeSwitcher compact />
               <Button variant="ghost" size="sm" onClick={handleLogout} aria-label="Sign out">
@@ -127,14 +130,14 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
               </Button>
             </div>
           </div>
-          <nav className="flex gap-1 overflow-x-auto px-3 pb-3" aria-label="Main">
+          <nav className="flex overflow-x-auto border-t border-ink/15 px-2" aria-label="Main">
             {nav.map((item) => (
-              <NavLink key={item.href} item={item} pathname={pathname} />
+              <NavLink key={item.href} item={item} pathname={pathname} row />
             ))}
           </nav>
         </header>
 
-        <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 sm:px-8 lg:py-12">{children}</main>
+        <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-10 sm:px-8 lg:py-14">{children}</main>
       </div>
     </div>
   );

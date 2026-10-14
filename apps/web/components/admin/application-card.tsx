@@ -1,3 +1,4 @@
+// apps\web\components\admin\application-card.tsx
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";

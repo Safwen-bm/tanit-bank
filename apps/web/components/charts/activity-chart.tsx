@@ -39,13 +39,13 @@ export function ActivityChart({ series }: { series: AdminStats["series"] }) {
             ]}
             contentStyle={{
               background: "var(--card)",
-              border: "2px solid var(--ink)",
-              borderRadius: 8,
+              border: "1px solid var(--ink)",
+              borderRadius: 0,
               color: "var(--ink)",
               fontSize: 13,
             }}
           />
-          <Bar dataKey="volume" fill="var(--brand)" radius={[4, 4, 0, 0]} maxBarSize={28} />
+          <Bar dataKey="volume" fill="var(--brand)" maxBarSize={28} />
         </BarChart>
       </ResponsiveContainer>
     </div>

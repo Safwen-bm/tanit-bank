@@ -15,20 +15,20 @@ export function LoanSchedule({ schedule, preview = 12 }: { schedule: LoanSchedul
 
   return (
     <div>
-      <div className="overflow-x-auto rounded-xl border-2 border-ink bg-card">
-        <table className="num w-full min-w-[40rem] text-right text-sm">
+      <div className="overflow-x-auto border border-ink/20 bg-card">
+        <table className="num w-full min-w-160 text-right text-sm">
           <thead>
-            <tr className="border-b-2 border-ink text-[11px] tracking-[0.15em] text-ink-soft uppercase">
-              <th className="px-4 py-3 text-left font-medium">#</th>
-              <th className="px-4 py-3 text-left font-medium">Due</th>
-              <th className="px-4 py-3 font-medium">Payment</th>
-              <th className="px-4 py-3 font-medium">Principal</th>
-              <th className="px-4 py-3 font-medium">Interest</th>
-              <th className="px-4 py-3 font-medium">Remaining</th>
-              {hasStatus && <th className="px-4 py-3 font-medium">Status</th>}
+            <tr className="border-b-2 border-ink font-sans text-xs text-ink-soft">
+              <th className="px-4 py-3 text-left font-semibold">#</th>
+              <th className="px-4 py-3 text-left font-semibold">Due</th>
+              <th className="px-4 py-3 font-semibold">Payment</th>
+              <th className="px-4 py-3 font-semibold">Principal</th>
+              <th className="px-4 py-3 font-semibold">Interest</th>
+              <th className="px-4 py-3 font-semibold">Remaining</th>
+              {hasStatus && <th className="px-4 py-3 font-semibold">Status</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-rule">
+          <tbody className="divide-y divide-ink/10">
             {rows.map((row) => (
               <tr key={row.number} className={cn(row.status === "PAID" && "text-ink-soft")}>
                 <td className="px-4 py-2.5 text-left text-ink-soft">{row.number}</td>
@@ -40,12 +40,12 @@ export function LoanSchedule({ schedule, preview = 12 }: { schedule: LoanSchedul
                 {hasStatus && (
                   <td className="px-4 py-2.5">
                     {row.status === "PAID" ? (
-                      <span className="inline-flex items-center gap-1 text-positive">
+                      <span className="inline-flex items-center gap-1 font-sans font-semibold text-positive">
                         <Check className="size-4" aria-hidden="true" />
                         Paid
                       </span>
                     ) : (
-                      <span className="text-ink-soft">Due</span>
+                      <span className="font-sans text-ink-soft">Due</span>
                     )}
                   </td>
                 )}

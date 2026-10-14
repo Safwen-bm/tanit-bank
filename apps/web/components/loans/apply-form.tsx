@@ -13,6 +13,7 @@ import { fractionToPercent, sumMoney } from "@/lib/money";
 import { useAccounts, useMyLoans, usePublicProducts } from "@/lib/queries";
 import type { LoanDetail, Simulation } from "@/lib/types";
 import { useDebounced } from "@/lib/use-debounced";
+import { cn } from "@/lib/utils";
 
 interface Me {
   profile: { monthlyIncome: string } | null;
@@ -103,7 +104,7 @@ export function ApplyForm() {
   if (products.isLoading || accounts.isLoading) return <p className="text-ink-soft">Loading...</p>;
   if (!product) return <p className="text-ink-soft">No loan products are available right now.</p>;
   if (activeAccounts.length === 0) {
-    return <p className="text-negative">You need an active account to receive the money.</p>;
+    return <p className="font-medium text-negative">You need an active account to receive the money.</p>;
   }
 
   return (
@@ -113,7 +114,7 @@ export function ApplyForm() {
           event.preventDefault();
           if (valid) submit.mutate();
         }}
-        className="space-y-7 rounded-xl border-2 border-ink bg-card p-8 shadow-[4px_4px_0_0_var(--ink)]"
+        className="space-y-7 border border-t-8 border-ink/20 border-t-brand bg-card p-6 sm:p-8"
         noValidate
       >
         <Field label="Loan type" htmlFor="product">
@@ -171,39 +172,37 @@ export function ApplyForm() {
           <input id="purpose" maxLength={200} value={purpose} onChange={(event) => setPurpose(event.target.value)} className={inputClass} />
         </Field>
 
-        <Button type="submit" loading={submit.isPending} disabled={!valid} className="w-full">
+        <Button type="submit" size="lg" loading={submit.isPending} disabled={!valid} className="w-full">
           Send application
         </Button>
       </form>
 
       <aside className="space-y-5" aria-live="polite">
-        <div className="rounded-xl border-2 border-ink bg-brand p-6 text-brand-ink shadow-[4px_4px_0_0_var(--ink)]">
-          <p className="num text-[11px] tracking-[0.2em] uppercase opacity-80">Monthly payment</p>
-          <p className="num mt-1 text-4xl font-semibold">
+        <div className="relative isolate overflow-hidden bg-brand p-6 text-brand-ink sm:p-7">
+          <p className="text-sm font-medium opacity-85">Monthly payment</p>
+          <p className="font-display condensed mt-1 text-6xl leading-[0.95]">
             {preview.data && valid ? formatTnd(preview.data.monthlyPayment) : "..."}
           </p>
           {preview.data && valid && (
-            <p className="num mt-3 text-sm opacity-80">
+            <p className="num mt-4 text-sm opacity-85">
               Total interest {formatTnd(preview.data.totalInterest)} · total {formatTnd(preview.data.totalPayment)}
             </p>
           )}
         </div>
 
         {preview.error && valid && (
-          <p role="alert" className="rounded-lg border-2 border-negative px-4 py-3 text-sm text-negative">
+          <p role="alert" className="border-l-4 border-negative bg-negative/10 px-4 py-3 text-sm font-medium text-negative">
             {preview.error.message}
           </p>
         )}
 
         {estimate !== null && (
-          <div
-            className={`rounded-xl border-2 p-5 text-sm ${overLimit ? "border-gold" : "border-dashed border-rule"}`}
-          >
-            <p className="flex items-center gap-2 font-semibold">
+          <div className={cn("border-l-4 bg-paper-2 p-5 text-sm", overLimit ? "border-gold" : "border-ink/30")}>
+            <p className="flex items-center gap-2 text-base font-semibold">
               {overLimit && <TriangleAlert className="size-4 text-gold" aria-hidden="true" />}
               About {estimate.toFixed(1)} % of your declared income
             </p>
-            <p className="mt-1 text-ink-soft">
+            <p className="mt-1.5 text-ink-soft">
               {overLimit
                 ? `This product allows ${limit} %. You can still apply, but the bank will look at it more closely.`
                 : `Within this product's ${limit} % limit.`}

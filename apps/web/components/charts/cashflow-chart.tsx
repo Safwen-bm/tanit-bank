@@ -51,31 +51,31 @@ export function CashflowChart({ data }: { data: CashflowPoint[] }) {
               formatter={(value, name) => [formatTnd(Number(value)), name]}
               contentStyle={{
                 background: "var(--card)",
-                border: "2px solid var(--ink)",
-                borderRadius: 8,
+                border: "1px solid var(--ink)",
+                borderRadius: 0,
                 color: "var(--ink)",
                 fontSize: 13,
               }}
             />
             <Legend iconType="square" wrapperStyle={{ fontSize: 12, color: "var(--ink-soft)" }} />
-            <Bar dataKey="income" name="Money in" fill="var(--positive)" radius={[4, 4, 0, 0]} maxBarSize={36} />
-            <Bar dataKey="expenses" name="Money out" fill="var(--accent)" radius={[4, 4, 0, 0]} maxBarSize={36} />
+            <Bar dataKey="income" name="Money in" fill="var(--positive)" maxBarSize={36} />
+            <Bar dataKey="expenses" name="Money out" fill="var(--accent)" maxBarSize={36} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      <dl className="num mt-4 grid grid-cols-3 gap-3 border-t-2 border-dashed border-rule pt-4 text-sm">
+      <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-ink/15 pt-4 text-sm">
         <div>
           <dt className="text-ink-soft">In this month</dt>
-          <dd className="mt-1 font-semibold text-positive">{formatTnd(current.income)}</dd>
+          <dd className="num mt-1 font-semibold text-positive">{formatTnd(current.income)}</dd>
         </div>
         <div>
           <dt className="text-ink-soft">Out this month</dt>
-          <dd className="mt-1 font-semibold">{formatTnd(current.expenses)}</dd>
+          <dd className="num mt-1 font-semibold">{formatTnd(current.expenses)}</dd>
         </div>
         <div>
           <dt className="text-ink-soft">Net</dt>
-          <dd className={cn("mt-1 font-semibold", net.startsWith("-") ? "text-negative" : "text-positive")}>
+          <dd className={cn("num mt-1 font-semibold", net.startsWith("-") ? "text-negative" : "text-positive")}>
             {formatTnd(net)}
           </dd>
         </div>

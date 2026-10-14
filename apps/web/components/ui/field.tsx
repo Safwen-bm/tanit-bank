@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 export const inputClass =
-  "w-full rounded-[3px] border border-ink/30 bg-card px-4 py-3.5 text-base text-ink outline-none transition placeholder:text-ink-soft/50 hover:border-ink/60 focus:border-ink focus:shadow-[0_3px_0_0_var(--brand)]";
+  "w-full rounded-[3px] border border-ink/30 bg-card px-4 py-3.5 text-base text-ink outline-none transition placeholder:text-ink-soft/50 hover:border-ink/60 focus:border-ink focus:shadow-[0_3px_0_0_var(--brand)] disabled:cursor-not-allowed disabled:opacity-50";
 
 export function Field({
   label,

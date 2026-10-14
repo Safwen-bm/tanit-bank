@@ -51,7 +51,7 @@ export function AuthShell({
           <ul className="mt-10 max-w-sm space-y-3.5">
             {PROMISES.map((text) => (
               <li key={text} className="flex gap-3.5 text-sm leading-relaxed text-deep-ink/80">
-                <span className="mt-[7px] size-2 shrink-0 bg-hot" aria-hidden="true" />
+                <span className="mt-1.75 size-2 shrink-0 bg-hot" aria-hidden="true" />
                 {text}
               </li>
             ))}

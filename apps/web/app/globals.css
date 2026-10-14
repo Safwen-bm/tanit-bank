@@ -187,21 +187,19 @@ body {
   box-shadow: 0 0 0 1.5px var(--ink);
 }
 
-/* ───────────── Legacy surfaces ─────────────
-   Kept only so pages that are not redesigned yet don't break.
-   Search the project for "ledger", "mosaic" and "tiles": if nothing uses them, delete this block. */
-.ledger {
-  background-color: var(--paper);
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0 31px,
-    color-mix(in oklab, var(--rule) 55%, transparent) 31px 32px
-  );
+/* ───────────── Toasts (sonner) ─────────────
+   A thick coloured edge says what kind of message it is. */
+[data-sonner-toast] {
+  border-left-width: 8px !important;
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.35) !important;
 }
-.mosaic {
-  height: 12px;
-  background: linear-gradient(90deg, var(--brand) 0 33%, var(--accent) 0 66%, var(--gold) 0);
+[data-sonner-toast][data-type="success"] {
+  border-left-color: var(--positive) !important;
 }
-.tiles {
-  background: color-mix(in oklab, var(--brand-ink) 8%, transparent);
+[data-sonner-toast][data-type="error"] {
+  border-left-color: var(--negative) !important;
+}
+[data-sonner-toast][data-type="warning"],
+[data-sonner-toast][data-type="info"] {
+  border-left-color: var(--gold) !important;
 }

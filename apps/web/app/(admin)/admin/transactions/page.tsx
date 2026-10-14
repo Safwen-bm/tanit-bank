@@ -1,3 +1,4 @@
+// apps\web\app\(admin)\admin\transactions\page.tsx
 "use client";
 
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";

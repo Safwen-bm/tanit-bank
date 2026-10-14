@@ -41,8 +41,8 @@ export function BalanceChart({ schedule, amount }: { schedule: ScheduleRow[]; am
             labelFormatter={(label) => `After month ${label}`}
             contentStyle={{
               background: "var(--card)",
-              border: "2px solid var(--ink)",
-              borderRadius: 8,
+              border: "1px solid var(--ink)",
+              borderRadius: 0,
               color: "var(--ink)",
               fontSize: 13,
             }}
@@ -51,7 +51,7 @@ export function BalanceChart({ schedule, amount }: { schedule: ScheduleRow[]; am
             type="monotone"
             dataKey="remaining"
             stroke="var(--brand)"
-            strokeWidth={2.5}
+            strokeWidth={3}
             fill="url(#balanceFill)"
           />
         </AreaChart>

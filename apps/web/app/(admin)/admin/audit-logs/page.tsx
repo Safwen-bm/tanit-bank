@@ -1,3 +1,4 @@
+// apps\web\app\(admin)\admin\audit-logs\page.tsx
 "use client";
 
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";

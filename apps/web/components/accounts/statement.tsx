@@ -41,25 +41,28 @@ export function Statement({ accountId }: { accountId: string }) {
   return (
     <section>
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="font-display text-2xl font-semibold">Statement</h2>
+        <h2 className="font-display condensed text-3xl sm:text-4xl">Statement</h2>
         <Button variant="outline" size="sm" loading={downloading} onClick={downloadPdf}>
           <Download className="size-4" aria-hidden="true" />
           Download PDF
         </Button>
       </div>
-      <p className="mt-1 text-sm text-ink-soft">
+      <p className="mt-1.5 text-sm text-ink-soft">
         The PDF covers the dates you pick below (every movement, whatever the other filters say).
       </p>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <label className="relative block">
           <span className="sr-only">Search</span>
-          <Search className="absolute top-3 left-0 size-4 text-ink-soft" aria-hidden="true" />
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-soft"
+            aria-hidden="true"
+          />
           <input
             value={filters.q}
             onChange={(event) => update({ q: event.target.value })}
             placeholder="Search note or IBAN"
-            className={`${inputClass} pl-6`}
+            className={`${inputClass} pl-10`}
           />
         </label>
         <select
@@ -94,13 +97,13 @@ export function Statement({ accountId }: { accountId: string }) {
       {filtered && (
         <button
           onClick={() => setFilters(EMPTY)}
-          className="mt-3 cursor-pointer text-sm font-medium text-brand underline underline-offset-4"
+          className="mt-3 cursor-pointer text-sm font-semibold text-brand underline decoration-2 underline-offset-4"
         >
           Clear filters
         </button>
       )}
 
-      <div className="mt-4 rounded-xl border-2 border-ink bg-card px-5">
+      <div className="mt-5 border border-ink/20 bg-card px-5">
         {history.isLoading ? (
           <p className="py-10 text-center text-ink-soft">Loading...</p>
         ) : data && data.items.length > 0 ? (

@@ -26,15 +26,15 @@ function Row({ tx, href }: { tx: TransactionView | RecentTransaction; href?: str
     <div className="flex items-center gap-4 py-4">
       <span
         className={cn(
-          "flex size-10 shrink-0 items-center justify-center rounded-full border-2",
-          incoming ? "border-positive text-positive" : "border-ink text-ink",
+          "flex size-10 shrink-0 items-center justify-center border",
+          incoming ? "border-positive bg-positive/10 text-positive" : "border-ink/30 text-ink",
         )}
       >
         <Icon className="size-4" aria-hidden="true" />
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">{tx.description ?? LABELS[tx.type]}</p>
+        <p className="truncate font-semibold">{tx.description ?? LABELS[tx.type]}</p>
         <p className="truncate text-sm text-ink-soft">
           {LABELS[tx.type]}
           {party && ` · ${party}`} · {formatDateTime(tx.createdAt)}
@@ -43,7 +43,7 @@ function Row({ tx, href }: { tx: TransactionView | RecentTransaction; href?: str
 
       <div className="text-right">
         <p className={cn("num font-semibold", incoming ? "text-positive" : "text-ink")}>
-          {incoming ? "+" : "-"} {formatTnd(tx.amount)}
+          {incoming ? "+" : "−"} {formatTnd(tx.amount)}
         </p>
         {tx.balanceAfter && <p className="num text-xs text-ink-soft">balance {formatTnd(tx.balanceAfter)}</p>}
       </div>
@@ -51,7 +51,7 @@ function Row({ tx, href }: { tx: TransactionView | RecentTransaction; href?: str
   );
 
   return href ? (
-    <Link href={href} className="block transition-colors hover:bg-paper-2/60">
+    <Link href={href} className="-mx-5 block px-5 transition-colors hover:bg-paper-2/60">
       {content}
     </Link>
   ) : (
@@ -67,7 +67,7 @@ export function TransactionList({
   linkToAccount?: boolean;
 }) {
   return (
-    <ul className="divide-y divide-rule">
+    <ul className="divide-y divide-ink/15">
       {items.map((tx) => (
         <li key={tx.id}>
           <Row tx={tx} href={linkToAccount && "accountId" in tx ? `/accounts/${tx.accountId}` : undefined} />

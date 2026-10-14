@@ -1,3 +1,4 @@
+// apps\web\app\(admin)\admin\loan-products\page.tsx
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";

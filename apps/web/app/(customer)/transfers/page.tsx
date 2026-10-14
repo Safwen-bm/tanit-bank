@@ -1,16 +1,16 @@
-// apps\web\app\(customer)\transfers\page.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
-import { ButtonLink } from "@/components/ui/button-link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Field, inputClass } from "@/components/ui/field";
+import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/api";
 import { formatIban, formatTnd } from "@/lib/format";
 import { useIdempotencyKey } from "@/lib/idempotency";
@@ -60,32 +60,38 @@ function TransferForm({ accounts }: { accounts: Account[] }) {
   if (receipt) {
     const tx = receipt.transaction;
     return (
-      <div className="rounded-xl border-2 border-ink bg-card p-8 shadow-[4px_4px_0_0_var(--ink)]">
-        <CheckCircle2 className="size-10 text-positive" aria-hidden="true" />
-        <h2 className="font-display mt-4 text-3xl font-semibold">Transfer sent</h2>
-        <p className="num mt-4 text-4xl font-semibold">{formatTnd(tx.amount)}</p>
-        <dl className="mt-6 space-y-3 border-t-2 border-dashed border-rule pt-6 text-sm">
-          <div className="flex justify-between gap-4">
-            <dt className="text-ink-soft">To</dt>
-            <dd className="text-right font-medium">{tx.counterparty?.name}</dd>
+      <div className="border-t-8 border-brand bg-deep p-8 text-deep-ink sm:p-10">
+        <p className="flex items-center gap-2 text-sm font-semibold text-hot">
+          <CheckCircle2 className="size-5" aria-hidden="true" />
+          Transfer sent
+        </p>
+        <p className="font-display condensed mt-4 text-[clamp(3.5rem,9vw,5.5rem)] leading-none">
+          {formatTnd(tx.amount).replace(" TND", "")}
+          <span className="ml-2 text-[0.3em] font-semibold text-deep-ink/70">TND</span>
+        </p>
+        <dl className="num mt-8 divide-y divide-deep-ink/15 border-y border-deep-ink/15 text-sm">
+          <div className="flex justify-between gap-4 py-3">
+            <dt className="font-sans text-deep-ink/60">To</dt>
+            <dd className="text-right font-sans font-medium">{tx.counterparty?.name}</dd>
           </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-ink-soft">IBAN</dt>
-            <dd className="num text-right">{tx.counterparty ? formatIban(tx.counterparty.iban) : ""}</dd>
+          <div className="flex justify-between gap-4 py-3">
+            <dt className="font-sans text-deep-ink/60">IBAN</dt>
+            <dd className="text-right">{tx.counterparty ? formatIban(tx.counterparty.iban) : ""}</dd>
           </div>
           {tx.balanceAfter && (
-            <div className="flex justify-between gap-4">
-              <dt className="text-ink-soft">Balance after</dt>
-              <dd className="num text-right">{formatTnd(tx.balanceAfter)}</dd>
+            <div className="flex justify-between gap-4 py-3">
+              <dt className="font-sans text-deep-ink/60">Balance after</dt>
+              <dd className="text-right">{formatTnd(tx.balanceAfter)}</dd>
             </div>
           )}
-          <div className="flex justify-between gap-4">
-            <dt className="text-ink-soft">Reference</dt>
-            <dd className="num text-right">{tx.id.slice(-12)}</dd>
+          <div className="flex justify-between gap-4 py-3">
+            <dt className="font-sans text-deep-ink/60">Reference</dt>
+            <dd className="text-right">{tx.id.slice(-12)}</dd>
           </div>
         </dl>
-        <div className="mt-8 flex gap-3">
+        <div className="mt-8 flex flex-wrap gap-3">
           <Button
+            variant="inverse"
             onClick={() => {
               setReceipt(null);
               reset({ fromAccountId: active[0]?.id ?? "" });
@@ -93,7 +99,7 @@ function TransferForm({ accounts }: { accounts: Account[] }) {
           >
             New transfer
           </Button>
-          <ButtonLink href="/dashboard" variant="ghost">
+          <ButtonLink href="/dashboard" variant="inverse-outline">
             Back to overview
           </ButtonLink>
         </div>
@@ -104,7 +110,7 @@ function TransferForm({ accounts }: { accounts: Account[] }) {
   return (
     <form
       onSubmit={handleSubmit((values) => mutation.mutate(values))}
-      className="space-y-7 rounded-xl border-2 border-ink bg-card p-8 shadow-[4px_4px_0_0_var(--ink)]"
+      className="space-y-7 border border-t-8 border-ink/20 border-t-brand bg-card p-6 sm:p-8"
       noValidate
     >
       <Field label="From" htmlFor="from" error={errors.fromAccountId?.message}>
@@ -139,7 +145,7 @@ function TransferForm({ accounts }: { accounts: Account[] }) {
           <input id="description" className={inputClass} {...register("description")} />
         </Field>
       </div>
-      <Button type="submit" loading={mutation.isPending} disabled={active.length === 0} className="w-full">
+      <Button type="submit" size="lg" loading={mutation.isPending} disabled={active.length === 0} className="w-full">
         Send money
       </Button>
     </form>
@@ -150,15 +156,11 @@ export default function TransfersPage() {
   const accounts = useAccounts();
 
   return (
-    <div className="space-y-10">
-      <header>
-        <p className="num text-xs tracking-[0.25em] text-accent uppercase">Transfers</p>
-        <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">Send money.</h1>
-        <p className="mt-3 max-w-xl text-ink-soft">
-          Transfers are instant and atomic: the money leaves your account and reaches the recipient in one step, or
-          nothing happens.
-        </p>
-      </header>
+    <div className="space-y-12">
+      <PageHeader title="Send money.">
+        Transfers are instant and atomic: the money leaves your account and reaches the recipient in one step, or
+        nothing happens.
+      </PageHeader>
 
       <div className="max-w-xl">
         {accounts.isLoading ? (
@@ -166,7 +168,7 @@ export default function TransfersPage() {
         ) : accounts.data ? (
           <TransferForm accounts={accounts.data} />
         ) : (
-          <p className="text-negative">Could not load your accounts.</p>
+          <p className="font-medium text-negative">Could not load your accounts.</p>
         )}
       </div>
     </div>

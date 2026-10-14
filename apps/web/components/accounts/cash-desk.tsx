@@ -53,27 +53,26 @@ export function CashDesk({ account }: { account: Account }) {
   });
 
   return (
-    <section className="rounded-xl border-2 border-ink bg-card p-6">
-      <div className="flex items-center justify-between">
-        <h2 className="font-display text-xl font-semibold">Cash desk</h2>
-        <div role="tablist" className="flex rounded-full border border-rule p-1 text-xs font-medium">
-          {(["deposit", "withdraw"] as const).map((value) => (
-            <button
-              key={value}
-              role="tab"
-              aria-selected={mode === value}
-              onClick={() => setMode(value)}
-              className={cn(
-                "cursor-pointer rounded-full px-3 py-1 capitalize transition-colors",
-                mode === value ? "bg-ink text-paper" : "text-ink-soft hover:text-ink",
-              )}
-            >
-              {value}
-            </button>
-          ))}
-        </div>
-      </div>
+    <section className="border border-t-8 border-ink/20 border-t-brand bg-card p-6">
+      <h2 className="font-display condensed text-3xl">Cash desk</h2>
       <p className="mt-1 text-sm text-ink-soft">Simulated cash desk. No real money moves.</p>
+
+      <div role="tablist" className="mt-5 grid grid-cols-2 border border-ink text-sm font-semibold">
+        {(["deposit", "withdraw"] as const).map((value) => (
+          <button
+            key={value}
+            role="tab"
+            aria-selected={mode === value}
+            onClick={() => setMode(value)}
+            className={cn(
+              "cursor-pointer py-2.5 capitalize transition-colors",
+              mode === value ? "bg-ink text-paper" : "text-ink-soft hover:text-ink",
+            )}
+          >
+            {value}
+          </button>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="mt-6 space-y-5" noValidate>
         <Field label="Amount (TND)" htmlFor="cash-amount" error={errors.amount?.message}>
@@ -89,10 +88,10 @@ export function CashDesk({ account }: { account: Account }) {
         <Field label="Note (optional)" htmlFor="cash-note" error={errors.description?.message}>
           <input id="cash-note" disabled={disabled} className={inputClass} {...register("description")} />
         </Field>
-        <Button type="submit" loading={mutation.isPending} disabled={disabled} className="w-full">
+        <Button type="submit" size="lg" loading={mutation.isPending} disabled={disabled} className="w-full">
           {mode === "deposit" ? "Deposit" : "Withdraw"}
         </Button>
-        {disabled && <p className="text-sm text-negative">This account is {account.status.toLowerCase()}.</p>}
+        {disabled && <p className="text-sm font-medium text-negative">This account is {account.status.toLowerCase()}.</p>}
       </form>
     </section>
   );

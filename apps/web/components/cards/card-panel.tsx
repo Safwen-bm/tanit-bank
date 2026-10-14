@@ -61,28 +61,28 @@ export function CardPanel({ card }: { card: BankCard }) {
     <article className="grid gap-8 lg:grid-cols-[minmax(0,24rem)_1fr] lg:items-start">
       <div>
         <CardVisual card={card} />
-        <p className="num mt-4 text-xs text-ink-soft">
+        <p className="num mt-5 text-xs text-ink-soft">
           Spends from {card.account.label ?? "your account"} · {formatIban(card.account.iban)}
         </p>
       </div>
 
-      <div className="space-y-7 rounded-xl border-2 border-ink bg-card p-6">
+      <div className="space-y-8 border border-t-8 border-ink/20 border-t-brand bg-card p-6 sm:p-8">
         <div>
           <div className="flex items-baseline justify-between gap-3">
-            <p className="num text-[11px] tracking-[0.18em] text-ink-soft uppercase">Spent this month</p>
+            <p className="text-sm font-semibold">Spent this month</p>
             <p className="num text-sm">
               {formatTnd(card.spentThisMonth)} of {formatTnd(card.spendingLimit)}
             </p>
           </div>
-          <div className="mt-2 h-2.5 overflow-hidden rounded-full border border-ink" role="progressbar" aria-valuenow={Math.round(used)} aria-valuemin={0} aria-valuemax={100}>
+          <div className="mt-3 h-3 bg-ink/10" role="progressbar" aria-valuenow={Math.round(used)} aria-valuemin={0} aria-valuemax={100}>
             <div className={cn("h-full", used >= 100 ? "bg-negative" : used >= 80 ? "bg-gold" : "bg-brand")} style={{ width: `${used}%` }} />
           </div>
-          <p className="num mt-1.5 text-xs text-ink-soft">{formatTnd(card.remainingThisMonth)} left</p>
+          <p className="num mt-2 text-xs text-ink-soft">{formatTnd(card.remainingThisMonth)} left</p>
         </div>
 
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-40 flex-1">
-            <label htmlFor={`limit-${card.id}`} className="num block text-[11px] tracking-[0.18em] text-ink-soft uppercase">
+            <label htmlFor={`limit-${card.id}`} className="mb-2 block text-sm font-semibold">
               Monthly limit (TND)
             </label>
             <input
@@ -94,7 +94,6 @@ export function CardPanel({ card }: { card: BankCard }) {
             />
           </div>
           <Button
-            size="sm"
             variant="outline"
             disabled={!limitValid}
             loading={update.isPending && update.variables?.spendingLimit !== undefined}
@@ -103,7 +102,6 @@ export function CardPanel({ card }: { card: BankCard }) {
             Save limit
           </Button>
           <Button
-            size="sm"
             variant={frozen ? "primary" : "outline"}
             loading={update.isPending && update.variables?.status !== undefined}
             onClick={() => update.mutate({ status: frozen ? "ACTIVE" : "FROZEN" })}
@@ -118,10 +116,10 @@ export function CardPanel({ card }: { card: BankCard }) {
             event.preventDefault();
             if (payValid) pay.mutate();
           }}
-          className="space-y-4 border-t-2 border-dashed border-rule pt-6"
+          className="space-y-4 border-t border-ink/20 pt-7"
         >
-          <p className="font-display text-lg font-semibold">Try a payment</p>
-          <p className="-mt-3 text-sm text-ink-soft">Simulates a purchase with this card. No real money moves.</p>
+          <p className="font-display condensed text-3xl">Try a payment</p>
+          <p className="-mt-2 text-sm text-ink-soft">Simulates a purchase with this card. No real money moves.</p>
           <div className="grid gap-4 sm:grid-cols-[1fr_9rem]">
             <input
               aria-label="Merchant"
@@ -140,7 +138,7 @@ export function CardPanel({ card }: { card: BankCard }) {
               className={`${inputClass} num`}
             />
           </div>
-          <Button type="submit" loading={pay.isPending} disabled={!payValid} className="w-full">
+          <Button type="submit" size="lg" loading={pay.isPending} disabled={!payValid} className="w-full">
             Pay with this card
           </Button>
         </form>

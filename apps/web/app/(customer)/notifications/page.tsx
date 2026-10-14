@@ -1,4 +1,3 @@
-// apps\web\app\(customer)\notifications\page.tsx
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
 import { useNotifications } from "@/lib/queries";
@@ -41,23 +41,22 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="num text-xs tracking-[0.25em] text-accent uppercase">Notifications</p>
-          <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">What happened.</h1>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          loading={markAll.isPending}
-          disabled={!data || data.unreadCount === 0}
-          onClick={() => markAll.mutate()}
-        >
-          Mark all as read
-        </Button>
-      </header>
+      <PageHeader
+        title="What happened."
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            loading={markAll.isPending}
+            disabled={!data || data.unreadCount === 0}
+            onClick={() => markAll.mutate()}
+          >
+            Mark all as read
+          </Button>
+        }
+      />
 
-      <div role="tablist" className="flex gap-2">
+      <div role="tablist" className="flex gap-7 border-b border-ink/20">
         {[
           { label: "All", value: false },
           { label: `Unread${data ? ` (${data.unreadCount})` : ""}`, value: true },
@@ -71,8 +70,10 @@ export default function NotificationsPage() {
               setPage(1);
             }}
             className={cn(
-              "cursor-pointer rounded-full border-2 px-4 py-1.5 text-sm font-medium transition-colors",
-              unreadOnly === tab.value ? "border-ink bg-ink text-paper" : "border-rule text-ink-soft hover:border-ink hover:text-ink",
+              "-mb-px cursor-pointer border-b-[3px] pb-3 text-base font-semibold transition-colors",
+              unreadOnly === tab.value
+                ? "border-brand text-ink"
+                : "border-transparent text-ink-soft hover:text-ink",
             )}
           >
             {tab.label}
@@ -80,26 +81,26 @@ export default function NotificationsPage() {
         ))}
       </div>
 
-      <div className="rounded-xl border-2 border-ink bg-card">
+      <div className="border border-ink/20 bg-card">
         {query.isLoading ? (
           <p className="py-12 text-center text-ink-soft">Loading...</p>
         ) : data && data.items.length > 0 ? (
-          <ul className="divide-y divide-rule">
+          <ul className="divide-y divide-ink/15">
             {data.items.map((item) => (
               <li key={item.id}>
                 <button
                   onClick={() => open(item)}
-                  className="flex w-full cursor-pointer items-start gap-4 px-5 py-4 text-left transition-colors hover:bg-paper-2/60"
+                  className={cn(
+                    "flex w-full cursor-pointer items-start gap-4 border-l-4 px-5 py-5 text-left transition-colors hover:bg-paper-2/60",
+                    item.readAt ? "border-transparent" : "border-brand",
+                  )}
                 >
-                  <span
-                    className={cn("mt-2 size-2.5 shrink-0 rounded-full", item.readAt ? "bg-transparent" : "bg-accent")}
-                    aria-label={item.readAt ? "Read" : "Unread"}
-                  />
                   <span className="min-w-0 flex-1">
-                    <span className={cn("block", item.readAt ? "font-medium" : "font-semibold")}>{item.title}</span>
-                    <span className="mt-0.5 block text-sm text-ink-soft">{item.body}</span>
+                    <span className={cn("block text-lg", item.readAt ? "font-medium" : "font-bold")}>{item.title}</span>
+                    <span className="mt-1 block text-ink-soft">{item.body}</span>
                   </span>
-                  <span className="num shrink-0 text-xs text-ink-soft">{formatDateTime(item.createdAt)}</span>
+                  {!item.readAt && <span className="sr-only">Unread</span>}
+                  <span className="num shrink-0 pt-1 text-xs text-ink-soft">{formatDateTime(item.createdAt)}</span>
                 </button>
               </li>
             ))}

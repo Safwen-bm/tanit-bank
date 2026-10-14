@@ -16,7 +16,7 @@ export function TanitLogo({
   inverted?: boolean;
   onBrand?: boolean;
 }) {
-  const mark = onBrand ? "text-brand-ink" : inverted ? "text-gold" : "text-brand";
+  const mark = onBrand ? "text-brand-ink" : inverted ? "text-hot" : "text-brand";
   const word = onBrand ? "text-brand-ink" : inverted ? "text-deep-ink" : "text-ink";
 
   return (

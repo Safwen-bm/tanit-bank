@@ -1,4 +1,3 @@
-// apps\web\app\(customer)\loans\[id]\page.tsx
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,10 +11,12 @@ import { LoanSchedule } from "@/components/loans/loan-schedule";
 import { StatusBadge } from "@/components/loans/status-badge";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { api, ApiError } from "@/lib/api";
 import { formatDate, formatIban, formatTnd } from "@/lib/format";
 import { useAccounts, useLoan } from "@/lib/queries";
 import type { LoanDetail } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 function RepayPanel({ loan }: { loan: LoanDetail }) {
   const queryClient = useQueryClient();
@@ -40,26 +41,54 @@ function RepayPanel({ loan }: { loan: LoanDetail }) {
 
   if (!next) return null;
   return (
-    <section className="rounded-xl border-2 border-ink bg-card p-6 shadow-[4px_4px_0_0_var(--ink)]">
-      <p className="num text-[11px] tracking-[0.18em] text-ink-soft uppercase">Next instalment</p>
-      <p className="num mt-1 text-3xl font-semibold">{formatTnd(next.amount)}</p>
-      <p className="num text-sm text-ink-soft">
+    <section className="border-t-8 border-brand bg-deep p-6 text-deep-ink sm:p-8">
+      <p className="text-sm text-deep-ink/65">Next instalment</p>
+      <p className="font-display condensed mt-1 text-5xl leading-none">{formatTnd(next.amount)}</p>
+      <p className="num mt-2 text-sm text-deep-ink/65">
         #{next.number} · due {formatDate(next.dueDate)}
       </p>
-      <label htmlFor="pay-from" className="num mt-5 block text-[11px] tracking-[0.18em] text-ink-soft uppercase">
+      <label htmlFor="pay-from" className="mt-7 mb-2 block text-sm font-semibold">
         Pay from
       </label>
-      <select id="pay-from" value={accountId} onChange={(event) => setChosen(event.target.value)} className={inputClass}>
+      <select
+        id="pay-from"
+        value={accountId}
+        onChange={(event) => setChosen(event.target.value)}
+        className={cn(inputClass, "border-deep-ink/30 bg-deep text-deep-ink hover:border-deep-ink/60 focus:border-deep-ink")}
+      >
         {options.map((account) => (
           <option key={account.id} value={account.id}>
             {account.label ?? account.type} · {formatTnd(account.balance)}
           </option>
         ))}
       </select>
-      <Button className="mt-5 w-full" loading={pay.isPending} disabled={!accountId} onClick={() => pay.mutate()}>
+      <Button variant="inverse" size="lg" className="mt-6 w-full" loading={pay.isPending} disabled={!accountId} onClick={() => pay.mutate()}>
         Pay this instalment
       </Button>
     </section>
+  );
+}
+
+function Notice({
+  tone,
+  icon,
+  title,
+  children,
+}: {
+  tone: "gold" | "negative" | "positive";
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  const border = { gold: "border-gold", negative: "border-negative", positive: "border-positive" }[tone];
+  return (
+    <div className={`flex gap-4 border-l-4 bg-paper-2 p-6 ${border}`}>
+      {icon}
+      <div className="min-w-0 flex-1">
+        <p className="text-lg font-semibold">{title}</p>
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -71,9 +100,9 @@ export default function LoanPage() {
   if (query.error || !query.data) {
     const missing = query.error instanceof ApiError && query.error.status === 404;
     return (
-      <div className="rounded-xl border-2 border-dashed border-rule p-10 text-center">
-        <p className="font-display text-xl">{missing ? "Loan not found." : "Something went wrong."}</p>
-        <Link href="/loans" className="mt-3 inline-block text-sm font-semibold text-brand underline underline-offset-4">
+      <div className="border-2 border-dashed border-ink/25 p-12 text-center">
+        <p className="font-display condensed text-4xl">{missing ? "Loan not found." : "Something went wrong."}</p>
+        <Link href="/loans" className="mt-4 inline-block text-sm font-semibold text-brand underline decoration-2 underline-offset-4">
           Back to loans
         </Link>
       </div>
@@ -83,86 +112,74 @@ export default function LoanPage() {
   const loan = query.data;
 
   return (
-    <div className="space-y-10">
-      <Link href="/loans" className="inline-flex items-center gap-2 text-sm text-ink-soft hover:text-ink">
+    <div className="space-y-12">
+      <Link href="/loans" className="inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink">
         <ArrowLeft className="size-4" aria-hidden="true" />
         Loans
       </Link>
 
-      <header className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
+      <header className="grid gap-8 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
           <div className="flex items-center gap-3">
-            <p className="num text-xs tracking-[0.25em] text-accent uppercase">{loan.product.name}</p>
+            <p className="text-lg font-semibold text-ink-soft">{loan.product.name}</p>
             <StatusBadge status={loan.status} />
           </div>
-          <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
+          <h1 className="font-display condensed mt-2 text-6xl leading-[0.9] text-ink sm:text-8xl">
             {formatTnd(loan.amount)}
           </h1>
-          <p className="num mt-2 text-sm text-ink-soft">
+          <p className="num mt-4 text-sm text-ink-soft">
             {loan.durationMonths} months at {Number(loan.interestRate).toFixed(2)} % · {formatTnd(loan.monthlyPayment)} a month
           </p>
         </div>
-        <div className="sm:text-right">
-          <p className="num text-[11px] tracking-[0.18em] text-ink-soft uppercase">Total to repay</p>
-          <p className="num text-2xl font-semibold">{formatTnd(loan.totalPayment)}</p>
-          <p className="num text-sm text-ink-soft">of which interest {formatTnd(loan.totalInterest)}</p>
+        <div className="border-t-2 border-ink pt-4 sm:text-right">
+          <p className="text-sm text-ink-soft">Total to repay</p>
+          <p className="font-display mt-1 text-4xl">{formatTnd(loan.totalPayment)}</p>
+          <p className="num mt-1 text-sm text-ink-soft">of which interest {formatTnd(loan.totalInterest)}</p>
         </div>
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
-        <div className="space-y-8">
+      <div className="grid gap-10 lg:grid-cols-[1fr_340px] lg:items-start">
+        <div className="space-y-10">
           {loan.status === "PENDING" && (
-            <div className="flex gap-4 rounded-xl border-2 border-gold p-5">
-              <Clock className="mt-0.5 size-6 shrink-0 text-gold" aria-hidden="true" />
-              <div>
-                <p className="font-semibold">Waiting for a decision</p>
-                <p className="mt-1 text-sm text-ink-soft">
-                  The bank is reviewing your application, in the order received.
-                  {loan.flagged && " Your repayments exceed this product's debt ratio, so it will get a closer look."}
-                </p>
-              </div>
-            </div>
+            <Notice tone="gold" icon={<Clock className="mt-0.5 size-6 shrink-0 text-gold" aria-hidden="true" />} title="Waiting for a decision">
+              <p className="mt-1 text-ink-soft">
+                The bank is reviewing your application, in the order received.
+                {loan.flagged && " Your repayments exceed this product's debt ratio, so it will get a closer look."}
+              </p>
+            </Notice>
           )}
           {loan.status === "REJECTED" && (
-            <div className="flex gap-4 rounded-xl border-2 border-negative p-5">
-              <XCircle className="mt-0.5 size-6 shrink-0 text-negative" aria-hidden="true" />
-              <div>
-                <p className="font-semibold">Application declined</p>
-                <p className="mt-1 text-sm">{loan.rejectionReason}</p>
-              </div>
-            </div>
+            <Notice tone="negative" icon={<XCircle className="mt-0.5 size-6 shrink-0 text-negative" aria-hidden="true" />} title="Application declined">
+              <p className="mt-1">{loan.rejectionReason}</p>
+            </Notice>
           )}
           {(loan.status === "APPROVED" || loan.status === "PAID_OFF") && (
-            <div className="flex gap-4 rounded-xl border-2 border-positive p-5">
-              <CheckCircle2 className="mt-0.5 size-6 shrink-0 text-positive" aria-hidden="true" />
-              <div className="flex-1">
-                <p className="font-semibold">
-                  {loan.status === "PAID_OFF" ? "Fully repaid" : "Approved and paid out"}
-                </p>
-                <p className="mt-1 text-sm text-ink-soft">
-                  {formatTnd(loan.amount)} reached {loan.account.label ?? "your account"} (
-                  <span className="num">{formatIban(loan.account.iban)}</span>)
-                  {loan.disbursedAt && ` on ${formatDate(loan.disbursedAt)}`}.
-                </p>
-                <div className="mt-4 max-w-sm">
-                  <LoanProgress paid={loan.paidInstallments} total={loan.durationMonths} />
-                </div>
+            <Notice
+              tone="positive"
+              icon={<CheckCircle2 className="mt-0.5 size-6 shrink-0 text-positive" aria-hidden="true" />}
+              title={loan.status === "PAID_OFF" ? "Fully repaid" : "Approved and paid out"}
+            >
+              <p className="mt-1 text-ink-soft">
+                {formatTnd(loan.amount)} reached {loan.account.label ?? "your account"} (
+                <span className="num">{formatIban(loan.account.iban)}</span>)
+                {loan.disbursedAt && ` on ${formatDate(loan.disbursedAt)}`}.
+              </p>
+              <div className="mt-5 max-w-sm">
+                <LoanProgress paid={loan.paidInstallments} total={loan.durationMonths} />
               </div>
-            </div>
+            </Notice>
           )}
 
           {loan.purpose && (
-            <p className="text-sm">
-              <span className="num text-[11px] tracking-[0.18em] text-ink-soft uppercase">Purpose </span>
+            <p>
+              <span className="mr-2 text-sm font-semibold text-ink-soft">Purpose</span>
               {loan.purpose}
             </p>
           )}
 
           {loan.schedule.length > 0 && (
-            <div>
-              <h2 className="font-display mb-3 text-2xl font-semibold">
-                {loan.status === "PENDING" ? "Repayment preview" : "Repayment schedule"}
-              </h2>
+            <div className="space-y-5">
+              <SectionHeading>{loan.status === "PENDING" ? "Repayment preview" : "Repayment schedule"}</SectionHeading>
               <LoanSchedule schedule={loan.schedule} />
             </div>
           )}

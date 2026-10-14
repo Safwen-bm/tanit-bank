@@ -14,18 +14,18 @@ export function ScheduleTable({ schedule }: { schedule: ScheduleRow[] }) {
 
   return (
     <div>
-      <div className="overflow-x-auto rounded-xl border-2 border-ink bg-card">
+      <div className="overflow-x-auto border border-ink/20 bg-card">
         <table className="num w-full min-w-136 text-right text-sm">
           <thead>
-            <tr className="border-b-2 border-ink text-[11px] tracking-[0.15em] text-ink-soft uppercase">
-              <th className="px-4 py-3 text-left font-medium">Month</th>
-              <th className="px-4 py-3 font-medium">Payment</th>
-              <th className="px-4 py-3 font-medium">Principal</th>
-              <th className="px-4 py-3 font-medium">Interest</th>
-              <th className="px-4 py-3 font-medium">Remaining</th>
+            <tr className="border-b-2 border-ink font-sans text-xs text-ink-soft">
+              <th className="px-4 py-3 text-left font-semibold">Month</th>
+              <th className="px-4 py-3 font-semibold">Payment</th>
+              <th className="px-4 py-3 font-semibold">Principal</th>
+              <th className="px-4 py-3 font-semibold">Interest</th>
+              <th className="px-4 py-3 font-semibold">Remaining</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-rule">
+          <tbody className="divide-y divide-ink/10">
             {rows.map((row) => (
               <tr key={row.number}>
                 <td className="px-4 py-2.5 text-left text-ink-soft">{row.number}</td>

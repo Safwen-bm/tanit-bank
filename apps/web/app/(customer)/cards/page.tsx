@@ -1,4 +1,3 @@
-// apps\web\app\(customer)\cards\page.tsx
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,6 +6,7 @@ import { toast } from "sonner";
 import { CardPanel } from "@/components/cards/card-panel";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
+import { PageHeader } from "@/components/ui/page-header";
 import { api } from "@/lib/api";
 import { formatTnd } from "@/lib/format";
 import { useAccounts, useCards } from "@/lib/queries";
@@ -40,9 +40,9 @@ function IssueForm() {
         event.preventDefault();
         if (limitValid) issue.mutate();
       }}
-      className="max-w-xl space-y-6 rounded-xl border-2 border-dashed border-rule p-6"
+      className="max-w-xl space-y-6 border-2 border-dashed border-ink/25 p-6 sm:p-8"
     >
-      <h2 className="font-display text-xl font-semibold">Order a card</h2>
+      <h2 className="font-display condensed text-3xl">Order a card</h2>
       <Field label="Spends from" htmlFor="card-account">
         <select id="card-account" value={selected.id} onChange={(event) => setAccountId(event.target.value)} className={inputClass}>
           {active.map((account) => (
@@ -60,7 +60,7 @@ function IssueForm() {
       >
         <input id="card-limit" inputMode="decimal" value={limit} onChange={(event) => setLimit(event.target.value)} className={`${inputClass} num`} />
       </Field>
-      <Button type="submit" loading={issue.isPending} disabled={!limitValid}>
+      <Button type="submit" size="lg" loading={issue.isPending} disabled={!limitValid}>
         Issue card
       </Button>
     </form>
@@ -71,28 +71,24 @@ export default function CardsPage() {
   const cards = useCards();
 
   return (
-    <div className="space-y-12">
-      <header>
-        <p className="num text-xs tracking-[0.25em] text-accent uppercase">Cards</p>
-        <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">Your cards.</h1>
-        <p className="mt-3 max-w-xl text-ink-soft">
-          Freeze a card in one tap, and set how much it may spend each month. A frozen card or a frozen account refuses
-          every payment at once.
-        </p>
-      </header>
+    <div className="space-y-14">
+      <PageHeader title="Your cards.">
+        Freeze a card in one tap, and set how much it may spend each month. A frozen card or a frozen account refuses
+        every payment at once.
+      </PageHeader>
 
       {cards.isLoading ? (
         <p className="text-ink-soft">Loading...</p>
       ) : (
         <>
           {cards.data && cards.data.length > 0 ? (
-            <div className="space-y-12">
+            <div className="space-y-14">
               {cards.data.map((card) => (
                 <CardPanel key={card.id} card={card} />
               ))}
             </div>
           ) : (
-            <p className="rounded-xl border-2 border-dashed border-rule p-8 text-center text-ink-soft">
+            <p className="border-2 border-dashed border-ink/25 p-10 text-center text-ink-soft">
               You have no card yet. Order your first one below.
             </p>
           )}
